@@ -25,7 +25,23 @@ Brosw は軽量なアプリケーションです:
 
 ## インストール
 
-現在はソースからのビルドのみ(Xcode Command Line Tools が必要):
+### Homebrew
+
+```sh
+brew install --cask pictiny/tap/brosw
+```
+
+アプリは ad-hoc 署名(未 notarize)のため、ダウンロード物に quarantine 属性が付いて macOS が起動をブロックすることがあります。quarantine なしでインストールするか:
+
+```sh
+brew install --cask --no-quarantine pictiny/tap/brosw
+```
+
+インストール後に属性を外してください: `xattr -d com.apple.quarantine /Applications/Brosw.app`
+
+### ソースからビルド
+
+Xcode Command Line Tools が必要です:
 
 ```sh
 git clone https://github.com/pictiny/brosw.git
@@ -75,10 +91,11 @@ defaults write io.github.pictiny.Brosw AppleLanguages -array ja
 先に設定ウィンドウの「デフォルトブラウザを Chrome に戻す」でデフォルトブラウザを返しておくと、削除後に URL の開き先が宙に浮きません。
 
 ```sh
-make uninstall   # 終了して /Applications から削除
+brew uninstall --cask brosw   # Homebrew の場合(設定ごと消すなら --zap を追加)
+make uninstall                # ソースビルドの場合: 終了して /Applications から削除
 ```
 
-設定を完全に消すには続けて `defaults delete io.github.pictiny.Brosw` を実行します。
+設定を手動で消すには `defaults delete io.github.pictiny.Brosw` を実行します。
 
 ## 開発
 

@@ -25,7 +25,23 @@ Most browser-routing apps decide *which browser* opens a URL, driven by URL-patt
 
 ## Installation
 
-Currently build-from-source only (requires Xcode Command Line Tools):
+### Homebrew
+
+```sh
+brew install --cask pictiny/tap/brosw
+```
+
+The app is ad-hoc signed (not notarized), so macOS quarantines the download and may refuse to open it. Either install with quarantine disabled:
+
+```sh
+brew install --cask --no-quarantine pictiny/tap/brosw
+```
+
+or clear the attribute afterwards: `xattr -d com.apple.quarantine /Applications/Brosw.app`
+
+### Build from source
+
+Requires Xcode Command Line Tools:
 
 ```sh
 git clone https://github.com/pictiny/brosw.git
@@ -74,10 +90,11 @@ defaults write io.github.pictiny.Brosw AppleLanguages -array en
 Use **Set Chrome as Default Browser** in the settings window first, so URLs don't point at a missing app after removal.
 
 ```sh
-make uninstall   # quits the app and removes it from /Applications
+brew uninstall --cask brosw   # Homebrew installs (add --zap to wipe settings too)
+make uninstall                # source builds: quits the app and removes it from /Applications
 ```
 
-To wipe the settings as well, follow up with `defaults delete io.github.pictiny.Brosw`.
+To wipe the settings by hand, run `defaults delete io.github.pictiny.Brosw`.
 
 ## Development
 

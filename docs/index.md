@@ -14,15 +14,13 @@ Opening a link from Terminal, Slack, or any other app usually lands in an unpred
 
 ## Install
 
-Requires macOS 13+ and Google Chrome. Build from source (Xcode Command Line Tools needed):
+Requires macOS 13+ and Google Chrome:
 
 ```sh
-git clone https://github.com/pictiny/brosw.git
-cd brosw
-make install
+brew install --cask pictiny/tap/brosw
 ```
 
-Then choose **Set as Default Browser** from the Brosw menu bar icon.
+Then choose **Set as Default Browser** from the Brosw menu bar icon. Prefer building from source? See the [README](https://github.com/pictiny/brosw#readme).
 
 ## Learn more
 
