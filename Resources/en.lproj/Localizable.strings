@@ -1,0 +1,31 @@
+/* Menu bar menu */
+"Set as Default Browser" = "Set as Default Browser";
+"Test: Show Picker" = "Test: Show Picker";
+"Settings…" = "Settings…";
+"Quit Brosw" = "Quit Brosw";
+
+/* Picker */
+"+%d more" = "+%d more";
+"1-9 to select · Esc to cancel · ⌘C to copy" = "1-9 to select · Esc to cancel · ⌘C to copy";
+"Open Settings" = "Open Settings";
+
+/* Errors */
+"Google Chrome was not found." = "Google Chrome was not found.";
+"Could not launch Google Chrome." = "Could not launch Google Chrome.";
+"The URLs have been copied to the clipboard." = "The URLs have been copied to the clipboard.";
+
+/* Settings window */
+"Brosw Settings" = "Brosw Settings";
+"Menu Bar" = "Menu Bar";
+"Picker" = "Picker";
+"Show account email addresses" = "Show account email addresses";
+"Show icon in the menu bar" = "Show icon in the menu bar";
+"Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker." = "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker.";
+"Profiles Shown in Picker" = "Profiles Shown in Picker";
+"Sort order" = "Sort order";
+"Most recently used first" = "Most recently used first";
+"Custom" = "Custom";
+"If every profile is hidden, all profiles will be shown." = "If every profile is hidden, all profiles will be shown.";
+"Default Browser" = "Default Browser";
+"Set Chrome as Default Browser" = "Set Chrome as Default Browser";
+"Hands the default browser role back to Chrome. macOS will ask for confirmation." = "Hands the default browser role back to Chrome. macOS will ask for confirmation.";
