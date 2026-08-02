@@ -19,6 +19,7 @@
 "Menu Bar" = "Menu Bar";
 "Picker" = "Picker";
 "Show account email addresses" = "Show account email addresses";
+"Show the browser icon on each profile" = "Show the browser icon on each profile";
 "Show icon in the menu bar" = "Show icon in the menu bar";
 "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker." = "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker.";
 "Profiles Shown in Picker" = "Profiles Shown in Picker";

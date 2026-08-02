@@ -83,6 +83,7 @@ final class PickerController: NSObject, NSWindowDelegate {
         model.profiles = profiles
         model.selectedIndex = 0
         model.showEmails = !AppSettings.hideProfileEmails
+        model.showBrowserBadge = !AppSettings.hideBrowserBadge
         showPanel()
     }
 

@@ -5,6 +5,7 @@ final class PickerViewModel: ObservableObject {
     @Published var profiles: [BrowserProfile] = []
     @Published var selectedIndex: Int = 0
     @Published var showEmails = true
+    @Published var showBrowserBadge = true
 
     var onChoose: ((Int) -> Void)?
     var onCancel: (() -> Void)?
@@ -26,7 +27,8 @@ struct PickerView: View {
                         profile: profile,
                         index: index,
                         isSelected: index == model.selectedIndex,
-                        showEmail: model.showEmails
+                        showEmail: model.showEmails,
+                        showBrowserBadge: model.showBrowserBadge
                     )
                     .contentShape(Rectangle())
                     .onTapGesture { model.onChoose?(index) }
@@ -99,6 +101,7 @@ private struct ProfileRow: View {
     let index: Int
     let isSelected: Bool
     let showEmail: Bool
+    let showBrowserBadge: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -106,7 +109,7 @@ private struct ProfileRow: View {
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
                 .frame(width: 12)
-            ProfileAvatarView(profile: profile, size: 28)
+            ProfileAvatarView(profile: profile, size: 28, showBrowserBadge: showBrowserBadge)
             VStack(alignment: .leading, spacing: 1) {
                 Text(profile.name)
                     .font(.body)
@@ -133,6 +136,7 @@ private struct ProfileRow: View {
 struct ProfileAvatarView: View {
     let profile: BrowserProfile
     let size: CGFloat
+    var showBrowserBadge = true
 
     var body: some View {
         avatar
@@ -174,7 +178,7 @@ struct ProfileAvatarView: View {
     }
 
     private var showBadge: Bool {
-        Browser.allCases.contains { $0.isInstalled && $0 != profile.browser }
+        showBrowserBadge && Browser.allCases.contains { $0.isInstalled && $0 != profile.browser }
     }
 
     /// プロファイルカラーを持たない場合の予備(id のハッシュで固定色)

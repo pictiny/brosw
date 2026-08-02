@@ -20,6 +20,12 @@ final class SettingsViewModel: ObservableObject {
             AppSettings.hideProfileEmails = !showEmails
         }
     }
+    @Published var showBrowserBadge = true {
+        didSet {
+            guard !isReloading else { return }
+            AppSettings.hideBrowserBadge = !showBrowserBadge
+        }
+    }
     @Published var sortOrder = AppSettings.ProfileSortOrder.recentFirst {
         didSet {
             guard !isReloading else { return }
@@ -42,6 +48,7 @@ final class SettingsViewModel: ObservableObject {
         hiddenIDs = AppSettings.hiddenProfileIDs
         showMenuBarIcon = !AppSettings.hideMenuBarIcon
         showEmails = !AppSettings.hideProfileEmails
+        showBrowserBadge = !AppSettings.hideBrowserBadge
         sortOrder = AppSettings.profileSortOrder
     }
 
@@ -73,9 +80,14 @@ struct SettingsView: View {
             }
 
             GroupBox(label: Text(L("Picker"))) {
-                Toggle(L("Show account email addresses"), isOn: $model.showEmails)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(6)
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle(L("Show account email addresses"), isOn: $model.showEmails)
+                    if multipleBrowsersInstalled {
+                        Toggle(L("Show the browser icon on each profile"), isOn: $model.showBrowserBadge)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(6)
             }
 
             GroupBox(label: Text(L("Profiles Shown in Picker"))) {
@@ -125,7 +137,7 @@ struct SettingsView: View {
         HStack(spacing: 4) {
             Toggle(isOn: isVisibleBinding(profile)) {
                 HStack(spacing: 8) {
-                    ProfileAvatarView(profile: profile, size: 22)
+                    ProfileAvatarView(profile: profile, size: 22, showBrowserBadge: model.showBrowserBadge)
                     Text(profile.name)
                         .lineLimit(1)
                     if let email = profile.email {
@@ -145,6 +157,10 @@ struct SettingsView: View {
             }
         }
         .padding(.vertical, 2)
+    }
+
+    private var multipleBrowsersInstalled: Bool {
+        Browser.allCases.filter(\.isInstalled).count > 1
     }
 
     private func moveButton(_ profile: BrowserProfile, offset: Int, symbol: String, disabled: Bool) -> some View {

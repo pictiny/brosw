@@ -14,6 +14,7 @@ enum AppSettings {
     private static let hiddenProfilesKey = "hiddenProfileDirectories"
     private static let hideMenuBarIconKey = "hideMenuBarIcon"
     private static let hideProfileEmailsKey = "hideProfileEmails"
+    private static let hideBrowserBadgeKey = "hideBrowserBadge"
     private static let sortOrderKey = "profileSortOrder"
     private static let customOrderKey = "customProfileOrder"
 
@@ -39,6 +40,15 @@ enum AppSettings {
         get { UserDefaults.standard.bool(forKey: hideProfileEmailsKey) }
         set {
             UserDefaults.standard.set(newValue, forKey: hideProfileEmailsKey)
+            NotificationCenter.default.post(name: changedNotification, object: nil)
+        }
+    }
+
+    /// アバター右下に、どのブラウザのプロファイルかを示すアイコンバッジを表示しない
+    static var hideBrowserBadge: Bool {
+        get { UserDefaults.standard.bool(forKey: hideBrowserBadgeKey) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: hideBrowserBadgeKey)
             NotificationCenter.default.post(name: changedNotification, object: nil)
         }
     }
