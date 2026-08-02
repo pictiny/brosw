@@ -17,9 +17,9 @@ enum AppSettings {
     private static let sortOrderKey = "profileSortOrder"
     private static let customOrderKey = "customProfileOrder"
 
-    /// ピッカーに表示しないプロファイルのディレクトリ名(`Default`, `Profile 1` …)。
-    static var hiddenProfileDirectories: Set<String> {
-        get { Set(UserDefaults.standard.stringArray(forKey: hiddenProfilesKey) ?? []) }
+    /// ピッカーに表示しないプロファイルの id(`chrome:Profile 1` …)。
+    static var hiddenProfileIDs: Set<String> {
+        get { Set((UserDefaults.standard.stringArray(forKey: hiddenProfilesKey) ?? []).map(normalizeKey)) }
         set {
             UserDefaults.standard.set(Array(newValue).sorted(), forKey: hiddenProfilesKey)
             NotificationCenter.default.post(name: changedNotification, object: nil)
@@ -54,28 +54,35 @@ enum AppSettings {
         }
     }
 
-    /// カスタム並び順(プロファイルディレクトリ名の配列)
+    /// カスタム並び順(プロファイル id の配列)
     static var customProfileOrder: [String] {
-        get { UserDefaults.standard.stringArray(forKey: customOrderKey) ?? [] }
+        get { (UserDefaults.standard.stringArray(forKey: customOrderKey) ?? []).map(normalizeKey) }
         set {
             UserDefaults.standard.set(newValue, forKey: customOrderKey)
             NotificationCenter.default.post(name: changedNotification, object: nil)
         }
     }
 
+    /// v0.2 までの Chrome 専用設定はディレクトリ名(`Profile 1`)を素で保存していた。
+    /// ブラウザ非修飾のキーは Chrome のものとして id 形式(`chrome:Profile 1`)へ読み替える。
+    private static func normalizeKey(_ key: String) -> String {
+        key.contains(":") ? key : "\(Browser.chrome.rawValue):\(key)"
+    }
+
     /// 設定に従って表示順を並べ替える。カスタム順に未登録のプロファイル
     /// (設定後に増えたものなど)は、元の順(最近使った順)のまま末尾に付ける。
-    static func displayOrder(_ profiles: [ChromeProfile]) -> [ChromeProfile] {
-        guard profileSortOrder == .custom, !customProfileOrder.isEmpty else {
+    static func displayOrder(_ profiles: [BrowserProfile]) -> [BrowserProfile] {
+        let order = customProfileOrder
+        guard profileSortOrder == .custom, !order.isEmpty else {
             return profiles
         }
         let rank = Dictionary(
-            uniqueKeysWithValues: customProfileOrder.enumerated().map { ($1, $0) }
+            uniqueKeysWithValues: order.enumerated().map { ($1, $0) }
         )
         return profiles.enumerated()
             .sorted { a, b in
-                let rankA = rank[a.element.directory] ?? Int.max
-                let rankB = rank[b.element.directory] ?? Int.max
+                let rankA = rank[a.element.id] ?? Int.max
+                let rankB = rank[b.element.id] ?? Int.max
                 if rankA != rankB { return rankA < rankB }
                 return a.offset < b.offset
             }

@@ -10,8 +10,8 @@
 "Open Settings" = "設定を開く";
 
 /* Errors */
-"Google Chrome was not found." = "Google Chrome が見つかりません。";
-"Could not launch Google Chrome." = "Google Chrome を起動できませんでした。";
+"No supported browser was found." = "対応ブラウザが見つかりません。";
+"Could not launch %@." = "%@ を起動できませんでした。";
 "The URLs have been copied to the clipboard." = "URL はクリップボードにコピーしました。";
 
 /* Settings window */

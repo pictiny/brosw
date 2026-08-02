@@ -56,26 +56,26 @@ final class PickerController: NSObject, NSWindowDelegate {
     // MARK: - Entry point
 
     func present(urls: [URL]) {
-        guard ChromeLauncher.isChromeInstalled else {
-            fail(urls: urls, message: L("Google Chrome was not found."))
-            return
-        }
-
         // ピッカー表示中に届いた URL は同一セッションに束ねる
         if panel != nil {
             model.urls.append(contentsOf: urls)
             return
         }
 
-        var profiles = AppSettings.displayOrder(ChromeProfileStore.loadProfiles())
-        let hidden = AppSettings.hiddenProfileDirectories
-        let visible = profiles.filter { !hidden.contains($0.directory) }
+        var profiles = AppSettings.displayOrder(BrowserProfileStore.loadProfiles())
+        guard !profiles.isEmpty else {
+            fail(urls: urls, message: L("No supported browser was found."))
+            return
+        }
+
+        let hidden = AppSettings.hiddenProfileIDs
+        let visible = profiles.filter { !hidden.contains($0.id) }
         if !visible.isEmpty {
             // 全件非表示にされてしまった場合は行き止まり防止のため全件表示に戻す
             profiles = visible
         }
         if profiles.count <= 1 {
-            openInChrome(urls: urls, profileDirectory: profiles.first?.directory)
+            if let only = profiles.first { launch(profile: only, urls: urls) }
             return
         }
 
@@ -145,7 +145,7 @@ final class PickerController: NSObject, NSWindowDelegate {
         let urls = model.urls
         let profile = model.profiles[index]
         dismiss()
-        openInChrome(urls: urls, profileDirectory: profile.directory)
+        launch(profile: profile, urls: urls)
     }
 
     private func copyAndClose() {
@@ -153,9 +153,9 @@ final class PickerController: NSObject, NSWindowDelegate {
         dismiss()
     }
 
-    private func openInChrome(urls: [URL], profileDirectory: String?) {
-        ChromeLauncher.open(urls: urls, profileDirectory: profileDirectory) { [weak self] in
-            self?.fail(urls: urls, message: L("Could not launch Google Chrome."))
+    private func launch(profile: BrowserProfile, urls: [URL]) {
+        BrowserLauncher.open(profile: profile, urls: urls) { [weak self] in
+            self?.fail(urls: urls, message: String(format: L("Could not launch %@."), profile.browser.appName))
         }
     }
 

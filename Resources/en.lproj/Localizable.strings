@@ -10,8 +10,8 @@
 "Open Settings" = "Open Settings";
 
 /* Errors */
-"Google Chrome was not found." = "Google Chrome was not found.";
-"Could not launch Google Chrome." = "Could not launch Google Chrome.";
+"No supported browser was found." = "No supported browser was found.";
+"Could not launch %@." = "Could not launch %@.";
 "The URLs have been copied to the clipboard." = "The URLs have been copied to the clipboard.";
 
 /* Settings window */

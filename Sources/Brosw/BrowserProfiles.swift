@@ -1,7 +1,10 @@
 import AppKit
 
-struct ChromeProfile: Identifiable {
-    let directory: String
+struct BrowserProfile: Identifiable {
+    let browser: Browser
+    /// プロファイルディレクトリ名(`Default`, `Profile 1`, …)。
+    /// Local State が読めない新規インストール等では nil(プロファイル未指定で起動)。
+    let directory: String?
     let name: String
     let email: String?
     let avatar: NSImage?
@@ -10,44 +13,51 @@ struct ChromeProfile: Identifiable {
     let strokeColor: NSColor?
     let lastActiveTime: Double
 
-    var id: String { directory }
+    /// ブラウザ横断で一意な識別子(設定の hide/並び順キー)。例: `chrome:Profile 1`
+    var id: String { "\(browser.rawValue):\(directory ?? "")" }
     var initial: String { String(name.prefix(1)).uppercased() }
 }
 
-enum ChromeProfileStore {
-    static let chromeDataDirectory = FileManager.default
-        .homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Application Support/Google/Chrome")
+enum BrowserProfileStore {
+    private static var caches: [Browser: (mtime: Date, profiles: [BrowserProfile])] = [:]
 
-    private static var cache: (mtime: Date, profiles: [ChromeProfile])?
+    /// インストール済みの全対応ブラウザからプロファイル一覧を返す(各ブラウザ内は最近使った順)。
+    static func loadProfiles() -> [BrowserProfile] {
+        Browser.allCases.filter(\.isInstalled).flatMap(loadProfiles(for:))
+    }
 
-    /// Local State の profile.info_cache からプロファイル一覧を返す(最近使った順)。
-    static func loadProfiles() -> [ChromeProfile] {
-        let localStateURL = chromeDataDirectory.appendingPathComponent("Local State")
+    /// 指定ブラウザの Local State からプロファイル一覧を返す。
+    /// 読めない場合でもインストール済みなら、プロファイル未指定の 1 件を返す(新規インストール対策)。
+    private static func loadProfiles(for browser: Browser) -> [BrowserProfile] {
+        let dataDirectory = browser.dataDirectory
+        let localStateURL = dataDirectory.appendingPathComponent("Local State")
+
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: localStateURL.path),
               let mtime = attrs[.modificationDate] as? Date
-        else { return [] }
+        else { return [fallbackProfile(for: browser)] }
 
-        if let cache, cache.mtime == mtime {
+        if let cache = caches[browser], cache.mtime == mtime {
             return cache.profiles
         }
 
         guard let data = try? Data(contentsOf: localStateURL),
               let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               let profileSection = json["profile"] as? [String: Any],
-              let infoCache = profileSection["info_cache"] as? [String: [String: Any]]
-        else { return [] }
+              let infoCache = profileSection["info_cache"] as? [String: [String: Any]],
+              !infoCache.isEmpty
+        else { return [fallbackProfile(for: browser)] }
 
-        var profiles = infoCache.map { directory, info -> ChromeProfile in
+        var profiles = infoCache.map { directory, info -> BrowserProfile in
             let name = (info["name"] as? String)
                 ?? (info["gaia_name"] as? String)
                 ?? directory
             let email = (info["user_name"] as? String).flatMap { $0.isEmpty ? nil : $0 }
-            return ChromeProfile(
+            return BrowserProfile(
+                browser: browser,
                 directory: directory,
                 name: name,
                 email: email,
-                avatar: loadAvatar(directory: directory, info: info),
+                avatar: loadAvatar(dataDirectory: dataDirectory, directory: directory, info: info),
                 fillColor: skColor(info["default_avatar_fill_color"]),
                 strokeColor: skColor(info["default_avatar_stroke_color"]),
                 lastActiveTime: (info["active_time"] as? Double) ?? 0
@@ -61,22 +71,36 @@ enum ChromeProfileStore {
             return $0.name.localizedCompare($1.name) == .orderedAscending
         }
 
-        cache = (mtime, profiles)
+        caches[browser] = (mtime, profiles)
         return profiles
+    }
+
+    /// Local State が読めないインストール済みブラウザ用のプレースホルダー(プロファイル未指定)。
+    private static func fallbackProfile(for browser: Browser) -> BrowserProfile {
+        BrowserProfile(
+            browser: browser,
+            directory: nil,
+            name: browser.displayName,
+            email: nil,
+            avatar: nil,
+            fillColor: nil,
+            strokeColor: nil,
+            lastActiveTime: 0
+        )
     }
 
     // MARK: - Avatar
 
-    /// Chrome 本体(ProfileAttributesEntry::GetAvatarIcon / IsUsingGAIAPicture)と
+    /// Chrome/Chromium 本体(ProfileAttributesEntry::GetAvatarIcon / IsUsingGAIAPicture)と
     /// 同じ優先順位でアバター画像を解決する:
     /// 「Google アカウントのアイコンを使う」(use_gaia_picture、またはアバター未カスタマイズ)
     /// なら gaia 画像 → プリセットアバター → gaia 画像 → nil(プレースホルダー描画)。
     /// use_gaia_picture はプリセット選択後にアカウントアイコンへ戻した場合にも立つため、
     /// is_using_default_avatar だけで判定するとプリセットを誤表示する。
-    private static func loadAvatar(directory: String, info: [String: Any]) -> NSImage? {
+    private static func loadAvatar(dataDirectory: URL, directory: String, info: [String: Any]) -> NSImage? {
         let gaiaFileName = (info["gaia_picture_file_name"] as? String)
             .flatMap { $0.isEmpty ? nil : $0 } ?? "Google Profile Picture.png"
-        let gaiaURL = chromeDataDirectory
+        let gaiaURL = dataDirectory
             .appendingPathComponent(directory)
             .appendingPathComponent(gaiaFileName)
 
@@ -90,7 +114,7 @@ enum ChromeProfileStore {
         if let iconURL = info["avatar_icon"] as? String,
            let index = iconURL.split(separator: "_").last.flatMap({ Int($0) }),
            let fileName = modernAvatarFileNames[index] {
-            let url = chromeDataDirectory
+            let url = dataDirectory
                 .appendingPathComponent("Avatars")
                 .appendingPathComponent(fileName)
             if let image = NSImage(contentsOf: url) {

@@ -2,7 +2,7 @@ import SwiftUI
 
 final class PickerViewModel: ObservableObject {
     @Published var urls: [URL] = []
-    @Published var profiles: [ChromeProfile] = []
+    @Published var profiles: [BrowserProfile] = []
     @Published var selectedIndex: Int = 0
     @Published var showEmails = true
 
@@ -95,7 +95,7 @@ struct PickerView: View {
 }
 
 private struct ProfileRow: View {
-    let profile: ChromeProfile
+    let profile: BrowserProfile
     let index: Int
     let isSelected: Bool
     let showEmail: Bool
@@ -131,10 +131,17 @@ private struct ProfileRow: View {
 }
 
 struct ProfileAvatarView: View {
-    let profile: ChromeProfile
+    let profile: BrowserProfile
     let size: CGFloat
 
     var body: some View {
+        avatar
+            .frame(width: size, height: size)
+            .overlay(alignment: .bottomTrailing) { badge }
+    }
+
+    @ViewBuilder
+    private var avatar: some View {
         if let image = profile.avatar {
             Image(nsImage: image)
                 .resizable()
@@ -152,11 +159,29 @@ struct ProfileAvatarView: View {
         }
     }
 
-    /// Chrome がプロファイルカラーを持たない場合の予備(ディレクトリ名のハッシュで固定色)
+    /// 複数ブラウザがインストールされているときのみ、どのブラウザのプロファイルかを
+    /// アバター右下のアプリアイコンで示す(Chrome の "Work" と Brave の "Work" を区別)。
+    @ViewBuilder
+    private var badge: some View {
+        if showBadge, let icon = profile.browser.appIcon {
+            let diameter = size * 0.5
+            Image(nsImage: icon)
+                .resizable()
+                .frame(width: diameter, height: diameter)
+                .clipShape(Circle())
+                .overlay(Circle().strokeBorder(Color(nsColor: .windowBackgroundColor), lineWidth: 1.5))
+        }
+    }
+
+    private var showBadge: Bool {
+        Browser.allCases.contains { $0.isInstalled && $0 != profile.browser }
+    }
+
+    /// プロファイルカラーを持たない場合の予備(id のハッシュで固定色)
     private var fallbackColor: Color {
         let palette: [Color] = [.blue, .green, .orange, .purple, .pink, .teal, .indigo, .red]
         var hash = 0
-        for scalar in profile.directory.unicodeScalars {
+        for scalar in profile.id.unicodeScalars {
             hash = (hash &* 31 &+ Int(scalar.value)) & 0x7FFF_FFFF
         }
         return palette[hash % palette.count]
