@@ -1,11 +1,11 @@
 import SwiftUI
 
 final class SettingsViewModel: ObservableObject {
-    @Published var profiles: [ChromeProfile] = []
-    @Published var hiddenDirectories: Set<String> = [] {
+    @Published var profiles: [BrowserProfile] = []
+    @Published var hiddenIDs: Set<String> = [] {
         didSet {
             guard !isReloading else { return }
-            AppSettings.hiddenProfileDirectories = hiddenDirectories
+            AppSettings.hiddenProfileIDs = hiddenIDs
         }
     }
     @Published var showMenuBarIcon = true {
@@ -20,13 +20,19 @@ final class SettingsViewModel: ObservableObject {
             AppSettings.hideProfileEmails = !showEmails
         }
     }
+    @Published var showBrowserBadge = true {
+        didSet {
+            guard !isReloading else { return }
+            AppSettings.hideBrowserBadge = !showBrowserBadge
+        }
+    }
     @Published var sortOrder = AppSettings.ProfileSortOrder.recentFirst {
         didSet {
             guard !isReloading else { return }
             AppSettings.profileSortOrder = sortOrder
             if sortOrder == .custom, AppSettings.customProfileOrder.isEmpty {
                 // 初回は現在の表示順(最近使った順)を初期値にする
-                AppSettings.customProfileOrder = profiles.map(\.directory)
+                AppSettings.customProfileOrder = profiles.map(\.id)
             }
             reload()
         }
@@ -38,20 +44,21 @@ final class SettingsViewModel: ObservableObject {
     func reload() {
         isReloading = true
         defer { isReloading = false }
-        profiles = AppSettings.displayOrder(ChromeProfileStore.loadProfiles())
-        hiddenDirectories = AppSettings.hiddenProfileDirectories
+        profiles = AppSettings.displayOrder(BrowserProfileStore.loadProfiles())
+        hiddenIDs = AppSettings.hiddenProfileIDs
         showMenuBarIcon = !AppSettings.hideMenuBarIcon
         showEmails = !AppSettings.hideProfileEmails
+        showBrowserBadge = !AppSettings.hideBrowserBadge
         sortOrder = AppSettings.profileSortOrder
     }
 
     /// カスタム並び順でプロファイルを上下に動かす
-    func move(_ profile: ChromeProfile, by offset: Int) {
+    func move(_ profile: BrowserProfile, by offset: Int) {
         guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else { return }
         let target = index + offset
         guard profiles.indices.contains(target) else { return }
         profiles.swapAt(index, target)
-        AppSettings.customProfileOrder = profiles.map(\.directory)
+        AppSettings.customProfileOrder = profiles.map(\.id)
     }
 }
 
@@ -73,9 +80,14 @@ struct SettingsView: View {
             }
 
             GroupBox(label: Text(L("Picker"))) {
-                Toggle(L("Show account email addresses"), isOn: $model.showEmails)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(6)
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle(L("Show account email addresses"), isOn: $model.showEmails)
+                    if multipleBrowsersInstalled {
+                        Toggle(L("Show the browser icon on each profile"), isOn: $model.showBrowserBadge)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(6)
             }
 
             GroupBox(label: Text(L("Profiles Shown in Picker"))) {
@@ -107,7 +119,7 @@ struct SettingsView: View {
                     Button(L("Set Chrome as Default Browser")) {
                         DefaultBrowser.requestSetChromeDefault()
                     }
-                    .disabled(!ChromeLauncher.isChromeInstalled)
+                    .disabled(!Browser.chrome.isInstalled)
                     Text(L("Hands the default browser role back to Chrome. macOS will ask for confirmation."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -121,11 +133,11 @@ struct SettingsView: View {
         .frame(width: 400)
     }
 
-    private func profileRow(_ profile: ChromeProfile) -> some View {
+    private func profileRow(_ profile: BrowserProfile) -> some View {
         HStack(spacing: 4) {
             Toggle(isOn: isVisibleBinding(profile)) {
                 HStack(spacing: 8) {
-                    ProfileAvatarView(profile: profile, size: 22)
+                    ProfileAvatarView(profile: profile, size: 22, showBrowserBadge: model.showBrowserBadge)
                     Text(profile.name)
                         .lineLimit(1)
                     if let email = profile.email {
@@ -147,7 +159,11 @@ struct SettingsView: View {
         .padding(.vertical, 2)
     }
 
-    private func moveButton(_ profile: ChromeProfile, offset: Int, symbol: String, disabled: Bool) -> some View {
+    private var multipleBrowsersInstalled: Bool {
+        Browser.allCases.filter(\.isInstalled).count > 1
+    }
+
+    private func moveButton(_ profile: BrowserProfile, offset: Int, symbol: String, disabled: Bool) -> some View {
         Button {
             model.move(profile, by: offset)
         } label: {
@@ -158,14 +174,14 @@ struct SettingsView: View {
         .disabled(disabled)
     }
 
-    private func isVisibleBinding(_ profile: ChromeProfile) -> Binding<Bool> {
+    private func isVisibleBinding(_ profile: BrowserProfile) -> Binding<Bool> {
         Binding(
-            get: { !model.hiddenDirectories.contains(profile.directory) },
+            get: { !model.hiddenIDs.contains(profile.id) },
             set: { visible in
                 if visible {
-                    model.hiddenDirectories.remove(profile.directory)
+                    model.hiddenIDs.remove(profile.id)
                 } else {
-                    model.hiddenDirectories.insert(profile.directory)
+                    model.hiddenIDs.insert(profile.id)
                 }
             }
         )

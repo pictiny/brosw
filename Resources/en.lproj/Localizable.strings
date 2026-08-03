@@ -10,8 +10,8 @@
 "Open Settings" = "Open Settings";
 
 /* Errors */
-"Google Chrome was not found." = "Google Chrome was not found.";
-"Could not launch Google Chrome." = "Could not launch Google Chrome.";
+"No supported browser was found." = "No supported browser was found.";
+"Could not launch %@." = "Could not launch %@.";
 "The URLs have been copied to the clipboard." = "The URLs have been copied to the clipboard.";
 
 /* Settings window */
@@ -19,6 +19,7 @@
 "Menu Bar" = "Menu Bar";
 "Picker" = "Picker";
 "Show account email addresses" = "Show account email addresses";
+"Show the browser icon on each profile" = "Show the browser icon on each profile";
 "Show icon in the menu bar" = "Show icon in the menu bar";
 "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker." = "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker.";
 "Profiles Shown in Picker" = "Profiles Shown in Picker";

@@ -10,8 +10,8 @@
 "Open Settings" = "設定を開く";
 
 /* Errors */
-"Google Chrome was not found." = "Google Chrome が見つかりません。";
-"Could not launch Google Chrome." = "Google Chrome を起動できませんでした。";
+"No supported browser was found." = "対応ブラウザが見つかりません。";
+"Could not launch %@." = "%@ を起動できませんでした。";
 "The URLs have been copied to the clipboard." = "URL はクリップボードにコピーしました。";
 
 /* Settings window */
@@ -19,6 +19,7 @@
 "Menu Bar" = "メニューバー";
 "Picker" = "ピッカー";
 "Show account email addresses" = "アカウントのメールアドレスを表示";
+"Show the browser icon on each profile" = "各プロファイルにブラウザアイコンを表示";
 "Show icon in the menu bar" = "メニューバーにアイコンを表示";
 "Even when the icon is hidden, launching Brosw again from Spotlight or Finder opens this settings window. You can also open it from the gear button in the picker." = "非表示にしても、Spotlight や Finder から Brosw をもう一度起動するとこの設定画面が開きます。ピッカー右下の歯車からも開けます。";
 "Profiles Shown in Picker" = "ピッカーに表示するプロファイル";

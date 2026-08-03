@@ -6,22 +6,22 @@
 
 [English](README.md) | [日本語](README.ja.md)
 
-A macOS menu bar app that lets you choose which Chrome profile opens each URL — in a popup right at your mouse cursor.
+A macOS menu bar app that lets you choose which browser profile opens each URL — in a popup right at your mouse cursor.
 
-When you open a link from Terminal, Slack, or any other app, it's hard to predict which Chrome profile it will land in, and it often ends up in the wrong one (work vs. personal). Brosw registers itself as your default browser, intercepts every URL, and asks you where it should go.
+When you open a link from Terminal, Slack, or any other app, it's hard to predict which Chrome profile it will land in, and it often ends up in the wrong one (work vs. personal). Brosw registers itself as your default browser, intercepts every URL, and asks you where it should go — across every profile of your installed Chromium browsers (Chrome, Brave, Vivaldi).
 
 ## Features
 
-Most browser-routing apps decide *which browser* opens a URL, driven by URL-pattern rules. Brosw is deliberately smaller:
+Most browser-routing apps decide *which browser* opens a URL, driven by URL-pattern rules. Brosw is smaller and sharper:
 
-- **Chrome profiles only** — it picks a profile, not a browser
+- **Profile-level, not just browser** — pick the exact profile of Chrome, Brave, or Vivaldi
 - **No rules — just pick** — no config files or URL patterns; a picker at your cursor, one keypress
 - **Native and lightweight** — a small menu bar app built with Swift + AppKit
 
 ## Requirements
 
 - macOS 13 (Ventura) or later
-- Google Chrome
+- At least one of: Google Chrome, Brave, or Vivaldi
 
 ## Installation
 
@@ -53,7 +53,7 @@ After installing, choose **Set as Default Browser** from the Brosw menu bar icon
 
 ## Usage
 
-When a URL opens, the picker appears next to your mouse cursor, listing your profiles with the same avatars and colors Chrome itself uses. Pick with the mouse or the keyboard:
+When a URL opens, the picker appears next to your mouse cursor, listing every profile across your installed Chromium browsers, with the same avatars and colors the browsers use. When more than one browser is installed, each row carries a small browser badge. Pick with the mouse or the keyboard:
 
 | Action | Result |
 |---|---|
